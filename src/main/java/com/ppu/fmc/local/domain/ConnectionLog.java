@@ -14,6 +14,9 @@ import org.springframework.data.annotation.CreatedDate;
 
 import com.ppu.fmc.util.LocalDateTimeAttributeConverter;
 
+import lombok.Data;
+
+@Data
 @Entity
 @Table(name = "connection_log")
 public class ConnectionLog {
@@ -47,102 +50,5 @@ public class ConnectionLog {
 	
 	@Convert(converter = LocalDateTimeAttributeConverter.class)
 	private LocalDateTime sentdate;
-
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
-
-	public String getMacaddr() {
-		return macaddr;
-	}
-
-	public void setMacaddr(String macaddr) {
-		this.macaddr = macaddr;
-	}
-
-	public String getIpaddrhex() {
-		return ipaddrhex;
-	}
-
-	public void setIpaddrhex(String ipaddrhex) {
-		this.ipaddrhex = ipaddrhex;
-	}
-
-	public String getIpaddr() {
-		return ipaddr;
-	}
-
-	public void setIpaddr(String ipaddr) {
-		this.ipaddr = ipaddr;
-	}
-
-	public String getUrl() {
-		return url;
-	}
-
-	public void setUrl(String url) {
-		this.url = url;
-	}
-
-	public String getIplocation() {
-		return iplocation;
-	}
-
-	public void setIplocation(String iplocation) {
-		this.iplocation = iplocation;
-	}
-
-	public Long getFirstpacketsec() {
-		return firstpacketsec;
-	}
-
-	public void setFirstpacketsec(Long firstpacketsec) {
-		this.firstpacketsec = firstpacketsec;
-	}
-
-	public Long getLastpacketsec() {
-		return lastpacketsec;
-	}
-
-	public void setLastpacketsec(Long lastpacketsec) {
-		this.lastpacketsec = lastpacketsec;
-	}
-
-	public LocalDateTime getFpsdate() {
-		return fpsdate;
-	}
-
-	public void setFpsdate(LocalDateTime fpsdate) {
-		this.fpsdate = fpsdate;
-	}
-
-	public LocalDateTime getCreateddate() {
-		return createddate;
-	}
-
-	public void setCreateddate(LocalDateTime createddate) {
-		this.createddate = createddate;
-	}
-
-	public LocalDateTime getSentdate() {
-		return sentdate;
-	}
-
-	public void setSentdate(LocalDateTime sentdate) {
-		this.sentdate = sentdate;
-	}
-
-	@Override
-	public String toString() {
-		return "ConnectionLog [id=" + id + ", macaddr=" + macaddr + ", ipaddrhex=" + ipaddrhex + ", ipaddr=" + ipaddr
-				+ ", url=" + url + ", iplocation=" + iplocation + ", firstpacketsec=" + firstpacketsec
-				+ ", lastpacketsec=" + lastpacketsec + ", fpsdate=" + fpsdate + ", createddate=" + createddate
-				+ ", sentdate=" + sentdate + "]";
-	}
-	
 	
 }

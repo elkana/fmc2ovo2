@@ -14,6 +14,9 @@ import org.springframework.data.annotation.CreatedDate;
 
 import com.ppu.fmc.util.LocalDateTimeAttributeConverter;
 
+import lombok.Data;
+
+@Data
 @Entity
 @Table(name = "macaddrurl")
 public class MacAddrUrl {
@@ -40,71 +43,5 @@ public class MacAddrUrl {
 	@Convert(converter = LocalDateTimeAttributeConverter.class)
 	@CreatedDate
 	private LocalDateTime createddate;
-	
-	public Long getId() {
-		return id;
-	}
-	public void setId(Long id) {
-		this.id = id;
-	}
-	public String getMacaddr() {
-		return macaddr;
-	}
-	public void setMacaddr(String macaddr) {
-		this.macaddr = macaddr;
-	}
-	
-	public String getIpaddr() {
-		return ipaddr;
-	}
-	public void setIpaddr(String ipaddr) {
-		this.ipaddr = ipaddr;
-	}
-	
-	public String getIplocation() {
-		return iplocation;
-	}
-	public void setIplocation(String iplocation) {
-		this.iplocation = iplocation;
-	}
-	public String getUrl() {
-		return url;
-	}
-	public void setUrl(String url) {
-		this.url = url;
-	}
-	public Long getFirstpacketsec() {
-		return firstpacketsec;
-	}
-	public void setFirstpacketsec(Long firstpacketsec) {
-		this.firstpacketsec = firstpacketsec;
-	}
-	public Long getLastpacketsec() {
-		return lastpacketsec;
-	}
-	public void setLastpacketsec(Long lastpacketsec) {
-		this.lastpacketsec = lastpacketsec;
-	}
-	
-	public LocalDateTime getSentdate() {
-		return sentdate;
-	}
-	public void setSentdate(LocalDateTime sentdate) {
-		this.sentdate = sentdate;
-	}
-	public LocalDateTime getCreateddate() {
-		return createddate;
-	}
-	public void setCreateddate(LocalDateTime createddate) {
-		this.createddate = createddate;
-	}
-	@Override
-	public String toString() {
-		return "MacAddrUrl [id=" + id + ", macaddr=" + macaddr + ", ipaddr=" + ipaddr + ", iplocation=" + iplocation
-				+ ", url=" + url + ", firstpacketsec=" + firstpacketsec + ", lastpacketsec=" + lastpacketsec
-				+ ", sentdate=" + sentdate + ", createddate=" + createddate + "]";
-	}
-
-	
 
 }

@@ -15,6 +15,9 @@ import org.springframework.data.annotation.LastModifiedDate;
 
 import com.ppu.fmc.util.LocalDateTimeAttributeConverter;
 
+import lombok.Data;
+
+@Data
 @Entity
 @Table(name = "macaddr")
 public class MacAddr {
@@ -50,77 +53,5 @@ public class MacAddr {
 	@Convert(converter = LocalDateTimeAttributeConverter.class)
 	@CreatedDate
 	private LocalDateTime createddate;
-	
-	public Long getId() {
-		return id;
-	}
-	public void setId(Long id) {
-		this.id = id;
-	}
-	public String getMacaddr() {
-		return macaddr;
-	}
-	public void setMacaddr(String macaddr) {
-		this.macaddr = macaddr;
-	}
-	public String getIpaddrhex() {
-		return ipaddrhex;
-	}
-	public void setIpaddrhex(String ipaddrhex) {
-		this.ipaddrhex = ipaddrhex;
-	}
-	
-	public String getIpaddr() {
-		return ipaddr;
-	}
-	public void setIpaddr(String ipaddr) {
-		this.ipaddr = ipaddr;
-	}
-	public String getLocation() {
-		return location;
-	}
-	public void setLocation(String location) {
-		this.location = location;
-	}
-
-	public Long getDeltasec() {
-		return deltasec;
-	}
-	public void setDeltasec(Long deltasec) {
-		this.deltasec = deltasec;
-	}
-	public Long getLowestsec() {
-		return lowestsec;
-	}
-	public void setLowestsec(Long lowestsec) {
-		this.lowestsec = lowestsec;
-	}
-	public LocalDateTime getLastprocesseddate() {
-		return lastprocesseddate;
-	}
-	public void setLastprocesseddate(LocalDateTime lastprocesseddate) {
-		this.lastprocesseddate = lastprocesseddate;
-	}
-	public LocalDateTime getUpdateddate() {
-		return updateddate;
-	}
-	public void setUpdateddate(LocalDateTime updateddate) {
-		this.updateddate = updateddate;
-	}
-	public LocalDateTime getCreateddate() {
-		return createddate;
-	}
-	public void setCreateddate(LocalDateTime createddate) {
-		this.createddate = createddate;
-	}
-	@Override
-	public String toString() {
-		return "MacAddr [id=" + id + ", macaddr=" + macaddr + ", ipaddrhex=" + ipaddrhex + ", ipaddr=" + ipaddr
-				+ ", location=" + location + ", deltasec=" + deltasec + ", lowestsec=" + lowestsec
-				+ ", lastprocesseddate=" + lastprocesseddate + ", updateddate=" + updateddate + ", createddate="
-				+ createddate + "]";
-	}
-	
-	
 
 }
