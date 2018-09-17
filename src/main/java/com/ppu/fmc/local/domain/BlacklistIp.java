@@ -11,9 +11,6 @@ import org.springframework.data.annotation.CreatedDate;
 
 import com.ppu.fmc.util.LocalDateTimeAttributeConverter;
 
-import lombok.Data;
-
-@Data
 @Entity
 @Table(name = "blacklistip")
 public class BlacklistIp {
@@ -25,5 +22,27 @@ public class BlacklistIp {
 	@Convert(converter = LocalDateTimeAttributeConverter.class)
 	@CreatedDate
 	private LocalDateTime createddate;
+
+	public String getIp() {
+		return ip;
+	}
+
+	public void setIp(String ip) {
+		this.ip = ip;
+	}
+
+	public LocalDateTime getCreateddate() {
+		return createddate;
+	}
+
+	public void setCreateddate(LocalDateTime createddate) {
+		this.createddate = createddate;
+	}
+
+	@Override
+	public String toString() {
+		return "BlacklistIp [ip=" + ip + ", createddate=" + createddate + "]";
+	}
+	
 	
 }
