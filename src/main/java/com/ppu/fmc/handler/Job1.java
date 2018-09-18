@@ -1,5 +1,7 @@
 package com.ppu.fmc.handler;
 
+import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,20 +12,29 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.ppu.fmc.local.domain.MacAddr;
 import com.ppu.fmc.local.model.HostIPMap;
 import com.ppu.fmc.local.model.HostMACMap;
+import com.ppu.fmc.local.repo.IMacAddrRepository;
+import com.ppu.fmc.util.CSVUtils;
 import com.ppu.fmc.util.StringUtils;
 
 @Component
 public class Job1 {
 	static Logger log = LoggerFactory.getLogger(Job1.class);
 
+	@Value("${local.data.ipclientmap}")
+	private String ipclientmap;
+
 	@Autowired
 	@Qualifier("fmcEntityManagerFactory")
 	EntityManager em;
+
+	@Autowired
+	IMacAddrRepository macAddrRepo;
 
 	private void method1() {
 		// get all active host
@@ -34,21 +45,31 @@ public class Job1 {
 		try {
 			List resultList = q.getResultList();
 
-			if (resultList.size() > 0) {
-				for (int i = 0; i < resultList.size(); i++) {
-					Object[] _fields = (Object[]) resultList.get(i);
+			for (int i = 0; i < resultList.size(); i++) {
+				Object[] _fields = (Object[]) resultList.get(i);
 
-					HostMACMap _obj = new HostMACMap();
-					_obj.setHostidhex(String.valueOf(_fields[0]));
-					_obj.setMacaddr(String.valueOf(_fields[1]));
-					_obj.setMacvendor(String.valueOf(_fields[2]));
+				HostMACMap _obj = new HostMACMap();
+				
+				_obj.setHostidhex(String.valueOf(_fields[0]));
+				_obj.setMacaddr(String.valueOf(_fields[1]));
+				_obj.setMacvendor(String.valueOf(_fields[2]));
 
-					macs.add(_obj);
-				}
+				macs.add(_obj);
 			}
 
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
+		}
+		
+		if (macs.size() < 1)
+			return;
+		
+		List listIpLocation = null;
+		try {
+			listIpLocation = CSVUtils.loadIpLocationCsv(ipclientmap);
+		} catch (IOException e1) {
+			// TO DO Auto-generated catch block
+			e1.printStackTrace();
 		}
 
 		// get all related IPs
@@ -58,18 +79,24 @@ public class Job1 {
 		try {
 			List resultList = q.getResultList();
 
-			if (resultList.size() > 0) {
-				for (int i = 0; i < resultList.size(); i++) {
-					Object[] _fields = (Object[]) resultList.get(i);
+			for (int i = 0; i < resultList.size(); i++) {
+				
+				Object[] _fields = (Object[]) resultList.get(i);
 
-					HostIPMap _obj = new HostIPMap();
-					_obj.setHostidhex(String.valueOf(_fields[0]));
-					_obj.setIpaddrhex(String.valueOf(_fields[1]));
-					_obj.setIpaddr(StringUtils.fixIPAddress(String.valueOf(_fields[2])));
-
-					ips.add(_obj);
-
+				HostIPMap _obj = new HostIPMap();
+				
+				_obj.setHostidhex(String.valueOf(_fields[0]));
+				_obj.setIpaddrhex(String.valueOf(_fields[1]));
+				_obj.setIpaddr(StringUtils.fixIPAddress(String.valueOf(_fields[2])));
+				
+				try {
+					_obj.setIplocation(CSVUtils.getLocation(listIpLocation, _obj.getIpaddr()));
+				} catch (Exception e) {
+					log.error(e.getMessage(), e);
 				}
+				
+
+				ips.add(_obj);
 
 			}
 
@@ -77,28 +104,62 @@ public class Job1 {
 			log.error(e.getMessage(), e);
 		}
 
-		if (macs.size() < 1 || ips.size() < 1)
+		if (ips.size() < 1)
 			return;
 
-		List<MacAddr> maList = new ArrayList<>();
+		List<MacAddr> maRecentList = new ArrayList<>();
 		
 		for (HostMACMap hmm: macs) {
 			for (HostIPMap him : ips) {
 				if (hmm.getHostidhex().equals(him.getHostidhex())) {
+					
 					MacAddr ma = new MacAddr();
+					
 					ma.setIpaddr(him.getIpaddr());
 					ma.setIpaddrhex(him.getIpaddrhex());
 					ma.setMacaddr(hmm.getMacaddr());
-//					ma.setLocation(location);
-//					ma.setCreateddate(createddate);
+					ma.setLocation(him.getIplocation());
+					ma.setCreateddate(LocalDateTime.now());
 					
-					maList.add(ma);
+					maRecentList.add(ma);
+					
 					break;
 				}
 			}
 		}
 		
-		log.info("Recent MacAddress: {} devices", maList.size());
+		List<MacAddr> findAllMac = macAddrRepo.findAll();
+		
+		log.info("Recent MacAddress: {} devices, {} in local", maRecentList.size(), findAllMac.size());
+		
+		int updateCounter = 0;
+		int deleteCounter = 0;
+		for (MacAddr macAddr : findAllMac) {
+		
+			// kalo masih ada update IPnya, kalo ga ada di delete saja
+			MacAddr _active = null;
+			for (MacAddr mrl : maRecentList) {
+
+				if (macAddr.getMacaddr().equals(mrl.getMacaddr())) {
+					_active = mrl; break;
+				} 
+				
+				if (_active != null) {
+					macAddr.setIpaddr(_active.getIpaddr());
+					macAddr.setIpaddrhex(_active.getIpaddrhex());
+					
+					updateCounter += 1;
+//					macAddrRepo.save(macAddr);
+				} else {
+					
+					deleteCounter += 1;
+//					macAddrRepo.delete(macAddr);
+				}
+			}
+		} 
+		
+		log.info("{} Refreshed local MacAddress", macAddrRepo.findAll());
+		
 	}
 
 	public boolean execute() throws Exception {
