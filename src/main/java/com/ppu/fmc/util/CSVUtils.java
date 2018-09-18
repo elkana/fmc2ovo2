@@ -79,6 +79,6 @@ public class CSVUtils {
 
 		}
 
-		throw new IpLocationNotFoundException(ipAddress);
+		throw new IpLocationNotFoundException(ipAddress + " not found");
 	}
 }

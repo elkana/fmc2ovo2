@@ -22,6 +22,7 @@ import com.ppu.fmc.local.model.HostMACMap;
 import com.ppu.fmc.local.repo.IMacAddrRepository;
 import com.ppu.fmc.util.CSVUtils;
 import com.ppu.fmc.util.StringUtils;
+import com.ppu.fmc.util.Utils;
 
 @Component
 public class Job1 {
@@ -52,7 +53,7 @@ public class Job1 {
 				HostMACMap _obj = new HostMACMap();
 
 				_obj.setHostidhex(String.valueOf(_fields[0]));
-				_obj.setMacaddr(String.valueOf(_fields[1]));
+				_obj.setMacaddr(Utils.convertHexToMacAddress(String.valueOf(_fields[1])));
 				_obj.setMacvendor(String.valueOf(_fields[2]));
 
 				macs.add(_obj);
@@ -113,7 +114,7 @@ public class Job1 {
 		if (ips.size() < 1)
 			return;
 
-		List<MacAddr> maRecentList = new ArrayList<>();
+		List<MacAddr> maActiveDevices = new ArrayList<>();
 
 		for (HostMACMap hmm : macs) {
 			for (HostIPMap him : ips) {
@@ -131,42 +132,55 @@ public class Job1 {
 					ma.setLocation(him.getIplocation());
 					ma.setCreateddate(LocalDateTime.now());
 
-					maRecentList.add(ma);
+					maActiveDevices.add(ma);
 
 					break;
 				}
 			}
 		}
 
-		List<MacAddr> findAllMac = macAddrRepo.findAll();
+		List<MacAddr> getAllLocalMac = macAddrRepo.findAll();
 
-		log.info("Recent MacAddress: {} devices, {} in local", maRecentList.size(), findAllMac.size());
+		log.info("Active MacAddress: {} devices, {} in local", maActiveDevices.size(), getAllLocalMac.size());
 
 		int updateCounter = 0;
 		int deleteCounter = 0;
-		for (MacAddr macAddr : findAllMac) {
+		for (MacAddr macAddr : getAllLocalMac) {
 
 			// kalo masih ada update IPnya, kalo ga ada di delete saja
 			MacAddr _active = null;
-			for (MacAddr mrl : maRecentList) {
-
+			int _row = -1;
+			
+			for (int i = 0; i < maActiveDevices.size(); i++) {
+				MacAddr mrl = maActiveDevices.get(i);
+				
 				if (macAddr.getMacaddr().equals(mrl.getMacaddr())) {
 					_active = mrl;
+					_row = i;
 					break;
 				}
-
 			}
+			
 			if (_active != null) {
 				macAddr.setIpaddr(_active.getIpaddr());
 				macAddr.setIpaddrhex(_active.getIpaddrhex());
 
+				// perbarui IPnya
 				updateCounter += 1;
 //				macAddrRepo.save(macAddr);
 			} else {
 
+				// karena ga aktif maka dihapus dr local
 				deleteCounter += 1;
 //				macAddrRepo.delete(macAddr);
 			}
+			
+			// should remove from recentList, any residue will be inserted
+			maActiveDevices.remove(_row);
+		}
+		
+		for (MacAddr ma : maActiveDevices) {
+			macAddrRepo.save(ma);
 		}
 
 		log.info("{} Refreshed local MacAddress", macAddrRepo.findAll());
