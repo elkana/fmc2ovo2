@@ -93,6 +93,9 @@ public class Job1 {
 					_obj.setIplocation(CSVUtils.getLocation(listIpLocation, _obj.getIpaddr()));
 				} catch (Exception e) {
 					log.error(e.getMessage(), e);
+					
+					// sementara kalo ga terdaftar lokasinya ga bisa diproses
+					continue;
 				}
 				
 
@@ -112,6 +115,9 @@ public class Job1 {
 		for (HostMACMap hmm: macs) {
 			for (HostIPMap him : ips) {
 				if (hmm.getHostidhex().equals(him.getHostidhex())) {
+					
+					// sementara kalo ga terdaftar lokasinya ga bisa diproses
+					if (him.getIplocation() == null) continue;
 					
 					MacAddr ma = new MacAddr();
 					
