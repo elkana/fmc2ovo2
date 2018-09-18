@@ -201,10 +201,10 @@ public class Job1 {
 
 	public boolean execute() throws Exception {
 
-		log.debug("Hello Job#1");
+		log.debug("Running {}", Job1.class.getSimpleName());
 
 //		log.debug("fmc.fetch.rows :: {}", fmcFetchRows);
-//		log.debug("local.data.ipclientmap :: {}", ipclientmap);
+		log.debug("local.data.ipclientmap :: {}", ipclientmap);
 //		log.debug("local.data.mac.keep.days :: {}", keepOldMacAddrDays);
 //		log.debug("local.data.mac.duplicate.keep :: {}", keepDuplicateMacAddr);
 //		log.debug("lastSentFirstPacketSec :: {} -> {}", lastSentFirstPacketSec, Utils.converToLDT(lastSentFirstPacketSec));

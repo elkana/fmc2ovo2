@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import com.ppu.fmc.handler.Job1;
 import com.ppu.fmc.handler.Job2;
+import com.ppu.fmc.handler.Job3;
 
 @Component
 @PropertySources({
@@ -22,8 +23,14 @@ public class TaskRunner {
 	@Value("${developer:false}")
 	private boolean developer;
 	
-	@Value("${scheduler.disable:false}")
-	private boolean disableJob;
+	@Value("${fmc.schedule1.disable:false}")
+	private boolean disableJob1;
+
+	@Value("${fmc.schedule2.disable:false}")
+	private boolean disableJob2;
+
+	@Value("${fmc.schedule3.disable:false}")
+	private boolean disableJob3;
 
 	@Value("${fmc.schedule1.delay.seconds}")
 	private long schedule1Seconds;
@@ -31,19 +38,25 @@ public class TaskRunner {
 	@Value("${fmc.schedule2.delay.seconds}")
 	private long schedule2Seconds;
 	
+	@Value("${fmc.schedule3.delay.seconds}")
+	private long schedule3Seconds;
+
 	@Autowired
 	Job1 job1;
 	
 	@Autowired
 	Job2 job2;
 	
+	@Autowired
+	Job3 job3;
+	
 	@Scheduled(initialDelay = 1000, fixedDelayString = "${fmc.schedule1.delay.seconds:20}000")
 	public void runJob1() throws Exception{
 		
-		if (disableJob) {
-			log.warn("Scheduled Job is currently disabled. Please run the program again or set scheduler.disable=false");
-			System.exit(0);
-			
+		log.debug("fmc.schedule1.disable :: {}", disableJob1);
+
+		if (disableJob1) {
+			log.warn("Scheduled {} is currently disabled.", Job1.class.getSimpleName());
 			return;
 		}
 		
@@ -66,10 +79,10 @@ public class TaskRunner {
 	@Scheduled(initialDelay = 500, fixedDelayString = "${fmc.schedule2.delay.seconds:25}000")
 	public void runJob2() throws Exception{
 		
-		if (disableJob) {
-			log.warn("Scheduled Job is currently disabled. Please run the program again or set scheduler.disable=false");
-			System.exit(0);
-			
+		log.debug("fmc.schedule2.disable :: {}", disableJob2);
+
+		if (disableJob2) {
+			log.warn("Scheduled {} is currently disabled.", Job2.class.getSimpleName());
 			return;
 		}
 		
@@ -89,4 +102,29 @@ public class TaskRunner {
 		
 	}
 
+	@Scheduled(initialDelay = 500, fixedDelayString = "${fmc.schedule3.delay.seconds:10}000")
+	public void runJob3() throws Exception{
+		
+		log.debug("fmc.schedule3.disable :: {}", disableJob3);
+
+		if (disableJob3) {
+			log.warn("Scheduled {} is currently disabled.", Job3.class.getSimpleName());
+			return;
+		}
+		
+		log.debug("fmc.schedule3.delay.seconds :: {}", schedule3Seconds);
+		
+		try {
+			boolean result = job3.execute();
+			log.info(Job3.class.getSimpleName() + " return " + result + "\n");
+//		}catch(SQLGrammerException e) {
+//			log.error(e.getMessage(), e);
+//			System.exit(0);
+//			throw e;
+		}
+		catch (Exception e) {
+			log.error(e.getMessage(), e);
+		}
+		
+	}
 }
