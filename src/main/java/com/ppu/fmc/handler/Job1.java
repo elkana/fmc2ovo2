@@ -145,7 +145,7 @@ public class Job1 {
 
 		int updateCounter = 0;
 		int deleteCounter = 0;
-		for (MacAddr macAddr : getAllLocalMac) {
+		for (MacAddr localMac : getAllLocalMac) {
 
 			// kalo masih ada update IPnya, kalo ga ada di delete saja
 			MacAddr _active = null;
@@ -154,7 +154,7 @@ public class Job1 {
 			for (int i = 0; i < maActiveDevices.size(); i++) {
 				MacAddr mrl = maActiveDevices.get(i);
 				
-				if (macAddr.getMacaddr().equals(mrl.getMacaddr())) {
+				if (localMac.getMacaddr().equals(mrl.getMacaddr())) {
 					_active = mrl;
 					_row = i;
 					break;
@@ -162,17 +162,28 @@ public class Job1 {
 			}
 			
 			if (_active != null) {
-				macAddr.setIpaddr(_active.getIpaddr());
-				macAddr.setIpaddrhex(_active.getIpaddrhex());
 
 				// perbarui IPnya
-				updateCounter += 1;
-				macAddrRepo.save(macAddr);
+				if (!_active.getIpaddrhex().equals(localMac.getIpaddrhex())) {
+					
+					String _previousIP = localMac.getIpaddr();
+					
+					localMac.setIpaddr(_active.getIpaddr());
+					localMac.setIpaddrhex(_active.getIpaddrhex());
+					localMac.setUpdateddate(LocalDateTime.now());
+
+					updateCounter += 1;
+					macAddrRepo.save(localMac);
+					
+					log.warn("UPDATED MacAddress {} {}. Before was {}", localMac.getMacaddr(), localMac.getIpaddr(), _previousIP);
+				}
+				
 			} else {
 
 				// karena ga aktif maka dihapus dr local
 				deleteCounter += 1;
-				macAddrRepo.delete(macAddr);
+				macAddrRepo.delete(localMac);
+				log.warn("DELETED MacAddress {} {}", localMac.getMacaddr(), localMac.getIpaddr());
 			}
 			
 			// should remove from recentList, any residue will be inserted
@@ -181,9 +192,10 @@ public class Job1 {
 		
 		for (MacAddr ma : maActiveDevices) {
 			macAddrRepo.save(ma);
+			log.warn("NEW MacAddress {} {}", ma.getMacaddr(), ma.getIpaddr());
 		}
 
-		log.info("{} Refreshed local MacAddress, {} deleted - {} updated - {} inserted", macAddrRepo.findAll(), deleteCounter, updateCounter, maActiveDevices.size());
+		log.info("{} Refreshed local MacAddress, {} deleted - {} updated - {} inserted", macAddrRepo.findAll().size(), deleteCounter, updateCounter, maActiveDevices.size());
 
 	}
 
