@@ -167,12 +167,12 @@ public class Job1 {
 
 				// perbarui IPnya
 				updateCounter += 1;
-//				macAddrRepo.save(macAddr);
+				macAddrRepo.save(macAddr);
 			} else {
 
 				// karena ga aktif maka dihapus dr local
 				deleteCounter += 1;
-//				macAddrRepo.delete(macAddr);
+				macAddrRepo.delete(macAddr);
 			}
 			
 			// should remove from recentList, any residue will be inserted
@@ -183,7 +183,7 @@ public class Job1 {
 			macAddrRepo.save(ma);
 		}
 
-		log.info("{} Refreshed local MacAddress", macAddrRepo.findAll());
+		log.info("{} Refreshed local MacAddress, {} deleted - {} updated - {} inserted", macAddrRepo.findAll(), deleteCounter, updateCounter, maActiveDevices.size());
 
 	}
 
