@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.ppu.fmc.exception.IpLocationNotFoundException;
 import com.ppu.fmc.local.domain.MacAddr;
 import com.ppu.fmc.local.model.HostIPMap;
 import com.ppu.fmc.local.model.HostMACMap;
@@ -49,7 +50,7 @@ public class Job1 {
 				Object[] _fields = (Object[]) resultList.get(i);
 
 				HostMACMap _obj = new HostMACMap();
-				
+
 				_obj.setHostidhex(String.valueOf(_fields[0]));
 				_obj.setMacaddr(String.valueOf(_fields[1]));
 				_obj.setMacvendor(String.valueOf(_fields[2]));
@@ -60,10 +61,10 @@ public class Job1 {
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 		}
-		
+
 		if (macs.size() < 1)
 			return;
-		
+
 		List listIpLocation = null;
 		try {
 			listIpLocation = CSVUtils.loadIpLocationCsv(ipclientmap);
@@ -80,24 +81,26 @@ public class Job1 {
 			List resultList = q.getResultList();
 
 			for (int i = 0; i < resultList.size(); i++) {
-				
+
 				Object[] _fields = (Object[]) resultList.get(i);
 
 				HostIPMap _obj = new HostIPMap();
-				
+
 				_obj.setHostidhex(String.valueOf(_fields[0]));
 				_obj.setIpaddrhex(String.valueOf(_fields[1]));
 				_obj.setIpaddr(StringUtils.fixIPAddress(String.valueOf(_fields[2])));
-				
+
 				try {
 					_obj.setIplocation(CSVUtils.getLocation(listIpLocation, _obj.getIpaddr()));
+				} catch (IpLocationNotFoundException e) {
+					// sementara kalo ga terdaftar lokasinya ga bisa diproses
+					log.error(e.getMessage());
+					continue;
+
 				} catch (Exception e) {
 					log.error(e.getMessage(), e);
-					
-					// sementara kalo ga terdaftar lokasinya ga bisa diproses
 					continue;
 				}
-				
 
 				ips.add(_obj);
 
@@ -111,61 +114,63 @@ public class Job1 {
 			return;
 
 		List<MacAddr> maRecentList = new ArrayList<>();
-		
-		for (HostMACMap hmm: macs) {
+
+		for (HostMACMap hmm : macs) {
 			for (HostIPMap him : ips) {
 				if (hmm.getHostidhex().equals(him.getHostidhex())) {
-					
+
 					// sementara kalo ga terdaftar lokasinya ga bisa diproses
-					if (him.getIplocation() == null) continue;
-					
+					if (him.getIplocation() == null)
+						continue;
+
 					MacAddr ma = new MacAddr();
-					
+
 					ma.setIpaddr(him.getIpaddr());
 					ma.setIpaddrhex(him.getIpaddrhex());
 					ma.setMacaddr(hmm.getMacaddr());
 					ma.setLocation(him.getIplocation());
 					ma.setCreateddate(LocalDateTime.now());
-					
+
 					maRecentList.add(ma);
-					
+
 					break;
 				}
 			}
 		}
-		
+
 		List<MacAddr> findAllMac = macAddrRepo.findAll();
-		
+
 		log.info("Recent MacAddress: {} devices, {} in local", maRecentList.size(), findAllMac.size());
-		
+
 		int updateCounter = 0;
 		int deleteCounter = 0;
 		for (MacAddr macAddr : findAllMac) {
-		
+
 			// kalo masih ada update IPnya, kalo ga ada di delete saja
 			MacAddr _active = null;
 			for (MacAddr mrl : maRecentList) {
 
 				if (macAddr.getMacaddr().equals(mrl.getMacaddr())) {
-					_active = mrl; break;
-				} 
-				
-				if (_active != null) {
-					macAddr.setIpaddr(_active.getIpaddr());
-					macAddr.setIpaddrhex(_active.getIpaddrhex());
-					
-					updateCounter += 1;
-//					macAddrRepo.save(macAddr);
-				} else {
-					
-					deleteCounter += 1;
-//					macAddrRepo.delete(macAddr);
+					_active = mrl;
+					break;
 				}
+
 			}
-		} 
-		
+			if (_active != null) {
+				macAddr.setIpaddr(_active.getIpaddr());
+				macAddr.setIpaddrhex(_active.getIpaddrhex());
+
+				updateCounter += 1;
+//				macAddrRepo.save(macAddr);
+			} else {
+
+				deleteCounter += 1;
+//				macAddrRepo.delete(macAddr);
+			}
+		}
+
 		log.info("{} Refreshed local MacAddress", macAddrRepo.findAll());
-		
+
 	}
 
 	public boolean execute() throws Exception {
