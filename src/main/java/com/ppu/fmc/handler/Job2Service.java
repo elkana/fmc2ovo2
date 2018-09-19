@@ -154,14 +154,19 @@ public class Job2Service {
 				uli.setFirstpacketsec(firstPacketSec);
 				uli.setMacaddr(macAddr.getMacaddr());
 				uli.setUrl(url);
-				UrlLog entity = new UrlLog();
-				entity.setUrlLogIdentity(uli);
-				entity.setIpaddr(ipAddress);
-				entity.setLocation(iplocation);
-				entity.setCreateddate(LocalDateTime.now());
-				urlLogRepo.save(entity);
-				log.debug("new row[{}/{}] = " + StringUtils.objectsToString(fields, ", "), (i + 1), items.size());
-			} catch (Exception e) {
+				
+				if (urlLogRepo.findOne(uli) != null) {
+					UrlLog entity = new UrlLog();
+					entity.setUrlLogIdentity(uli);
+					entity.setIpaddr(ipAddress);
+					entity.setLocation(iplocation);
+					entity.setCreateddate(LocalDateTime.now());
+					urlLogRepo.save(entity);
+					log.debug("new row[{}/{}] = " + StringUtils.objectsToString(fields, ", "), (i + 1), items.size());
+
+				}
+				
+							} catch (Exception e) {
 				// TODO: handle exception
 				log.error(e.getMessage(), e);
 			}
