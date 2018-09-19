@@ -109,6 +109,7 @@ public class Job2Service {
 		List<Object[]> items = searchAllUrlInFMCFor(macAddr, fmcFetchRows);
 		
 		log.info("COLLECTING {} urls in connection_log for ip {}, mac {} since {}", items.size(), macAddr.getIpaddr(), macAddr.getMacaddr(), macAddr.getLastprocesseddate());
+		
 		List<String> ipAddressesInHexa = new ArrayList<String>();
 
 		// a. first, collect all ipaddress in hexa
@@ -147,19 +148,24 @@ public class Job2Service {
 				log.error(e.getMessage(), e);
 			}
 			
-			// just dump it
-			UrlLogIdentity uli = new UrlLogIdentity();
-			uli.setFirstpacketsec(firstPacketSec);
-			uli.setMacaddr(macAddr.getMacaddr());
-			uli.setUrl(url);
-			
-			UrlLog entity = new UrlLog();
-			entity.setUrlLogIdentity(uli);
-			entity.setIpaddr(ipAddress);
-			entity.setLocation(iplocation);
-			entity.setCreateddate(LocalDateTime.now());
-			
-			urlLogRepo.save(entity);
+			try {
+				// just dump it
+				UrlLogIdentity uli = new UrlLogIdentity();
+				uli.setFirstpacketsec(firstPacketSec);
+				uli.setMacaddr(macAddr.getMacaddr());
+				uli.setUrl(url);
+				UrlLog entity = new UrlLog();
+				entity.setUrlLogIdentity(uli);
+				entity.setIpaddr(ipAddress);
+				entity.setLocation(iplocation);
+				entity.setCreateddate(LocalDateTime.now());
+				urlLogRepo.save(entity);
+				log.debug("new row[{}/{}] = " + StringUtils.objectsToString(fields, ", "), (i + 1), items.size());
+			} catch (Exception e) {
+				// TODO: handle exception
+				log.error(e.getMessage(), e);
+			}
+
 		}
 		
 		return CompletableFuture.completedFuture(null);

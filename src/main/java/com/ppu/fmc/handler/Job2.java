@@ -267,12 +267,12 @@ public class Job2 {
 		log.info("PROCESSING {} macaddresses among {}", cleanMac.size(), allMac.size());
 
 		StopWatch sw = StopWatch.AutoStart();
+
 		CompletableFuture<?>[] array = new CompletableFuture<?>[cleanMac.size()];
 
 		for (int i = 0; i < cleanMac.size(); i++) {
 
 			array[i] = job2Service.collectUrl(ipLocations, cleanMac.get(i));
-
 		}
 
 		// Wait until they are all done
