@@ -131,6 +131,8 @@ public class Job3 {
 
 					connLogRepo.save(_connLog);
 				}
+				
+				//TODO perlu langsung ngirim atau gmn
 
 			}
 
