@@ -62,7 +62,7 @@ public class Job1 {
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 		}
-
+		
 		if (macs.size() < 1)
 			return;
 
@@ -95,7 +95,7 @@ public class Job1 {
 					_obj.setIplocation(CSVUtils.getLocation(listIpLocation, _obj.getIpaddr()));
 				} catch (IpLocationNotFoundException e) {
 					// sementara kalo ga terdaftar lokasinya ga bisa diproses
-					log.error(e.getMessage());
+					log.warn(e.getMessage());
 					continue;
 
 				} catch (Exception e) {

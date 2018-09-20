@@ -7,6 +7,7 @@ import javax.persistence.Convert;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
 
 import org.springframework.data.annotation.CreatedDate;
 
@@ -18,6 +19,10 @@ public class UrlLog {
 	
 	@EmbeddedId
     private UrlLogIdentity urlLogIdentity;
+	
+	@NotNull
+	@Column(length = 4096)
+	private String url;
 	
 	@Column(length = 15)
 	private String ipaddr;
@@ -40,6 +45,14 @@ public class UrlLog {
 
 	public void setUrlLogIdentity(UrlLogIdentity urlLogIdentity) {
 		this.urlLogIdentity = urlLogIdentity;
+	}
+	
+	public String getUrl() {
+		return url;
+	}
+
+	public void setUrl(String url) {
+		this.url = url;
 	}
 
 	public String getIpaddr() {

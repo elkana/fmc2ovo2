@@ -55,6 +55,10 @@ public class Job2 {
 	@Value("${local.procbackdate.minutes:10}")
 	private int backProcessedDateMinutes;
 
+	// 0 for unlimited
+	@Value("${local.data.url.sent.max:0}")
+	private int maxUrlSent;
+
 	@Value("${ovo.ws.url}")
 	private String urlOVO;
 	
@@ -109,7 +113,16 @@ public class Job2 {
 				continue;
 			}
 
+			// hasilnya bisa ribuan kalo ada job sebelumnya sempet mati 
+			// jd hny akan diproses yg firstpacketsec terakhir sesuai jumlah maxUrlSent
+			// bedanya dgn fmcFetchRows adalah dari sisi FMC, kalo maxUrlSent dari sisi MySQL/Local
 			List<Object[]> items = searchAllUrlInFMCFor(action, fmcFetchRows);
+			
+			if (maxUrlSent > 0) {
+				while (items.size() > maxUrlSent) {
+					items.remove(0);
+				}
+			}
 
 			log.info("There are {} urls in connection_log for ip {}, mac {} since {}", items.size(), action.getIpaddr(),
 					action.getMacaddr(), action.getLastprocesseddate());

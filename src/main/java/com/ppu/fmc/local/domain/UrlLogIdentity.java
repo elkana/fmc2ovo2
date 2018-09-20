@@ -22,8 +22,8 @@ public class UrlLogIdentity implements Serializable {
 	private String macaddr;
 
 	@NotNull
-	@Column(length = 4096)
-	private String url;
+	@Column(length = 255)
+	private String keyurl;
 
 	public Long getFirstpacketsec() {
 		return firstpacketsec;
@@ -41,17 +41,17 @@ public class UrlLogIdentity implements Serializable {
 		this.macaddr = macaddr;
 	}
 
-	public String getUrl() {
-		return url;
+	public String getKeyurl() {
+		return keyurl;
 	}
 
-	public void setUrl(String url) {
-		this.url = url;
+	public void setKeyurl(String keyurl) {
+		this.keyurl = keyurl;
 	}
 
 	@Override
 	public String toString() {
-		return "UrlLogIdentity [firstpacketsec=" + firstpacketsec + ", macaddr=" + macaddr + ", url=" + url + "]";
+		return "UrlLogIdentity [firstpacketsec=" + firstpacketsec + ", macaddr=" + macaddr + ", keyurl=" + keyurl + "]";
 	}
 
 	@Override
@@ -59,8 +59,8 @@ public class UrlLogIdentity implements Serializable {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((firstpacketsec == null) ? 0 : firstpacketsec.hashCode());
+		result = prime * result + ((keyurl == null) ? 0 : keyurl.hashCode());
 		result = prime * result + ((macaddr == null) ? 0 : macaddr.hashCode());
-		result = prime * result + ((url == null) ? 0 : url.hashCode());
 		return result;
 	}
 
@@ -78,15 +78,15 @@ public class UrlLogIdentity implements Serializable {
 				return false;
 		} else if (!firstpacketsec.equals(other.firstpacketsec))
 			return false;
+		if (keyurl == null) {
+			if (other.keyurl != null)
+				return false;
+		} else if (!keyurl.equals(other.keyurl))
+			return false;
 		if (macaddr == null) {
 			if (other.macaddr != null)
 				return false;
 		} else if (!macaddr.equals(other.macaddr))
-			return false;
-		if (url == null) {
-			if (other.url != null)
-				return false;
-		} else if (!url.equals(other.url))
 			return false;
 		return true;
 	}

@@ -36,14 +36,14 @@ public class Job2Service {
 
 	@Value("${fmc.fetch.rows:5}")
 	private int fmcFetchRows;
-	
+
 	@Autowired
 	@Qualifier("fmcEntityManagerFactory")
 	EntityManager em;
 
 	@Autowired
 	OVOUrlService ovoUrlService;
-	
+
 	@Autowired
 	IUrlLogRepository urlLogRepo;
 
@@ -101,15 +101,16 @@ public class Job2Service {
 
 		return rows;
 	}
-	
+
 	@Async
-	public CompletableFuture<Void> collectUrl(List ipLocations, MacAddr macAddr) throws InterruptedException, RestClientException,
-			KeyManagementException, NoSuchAlgorithmException, KeyStoreException, IOException {
-		
+	public CompletableFuture<Void> collectUrl(List ipLocations, MacAddr macAddr) throws InterruptedException,
+			RestClientException, KeyManagementException, NoSuchAlgorithmException, KeyStoreException, IOException {
+
 		List<Object[]> items = searchAllUrlInFMCFor(macAddr, fmcFetchRows);
-		
-		log.info("COLLECTING {} urls in connection_log for ip {}, mac {} since {}", items.size(), macAddr.getIpaddr(), macAddr.getMacaddr(), macAddr.getLastprocesseddate());
-		
+
+		log.info("COLLECTING {} urls in connection_log for ip {}, mac {} since {}", items.size(), macAddr.getIpaddr(),
+				macAddr.getMacaddr(), macAddr.getLastprocesseddate());
+
 		List<String> ipAddressesInHexa = new ArrayList<String>();
 
 		// a. first, collect all ipaddress in hexa
@@ -130,7 +131,7 @@ public class Job2Service {
 			if (!found)
 				ipAddressesInHexa.add(ipAddressInHexa);
 		}
-		
+
 		// dump into url_log
 		for (int i = 0; i < items.size(); i++) {
 			Object[] fields = items.get(i);
@@ -147,32 +148,31 @@ public class Job2Service {
 			} catch (Exception e) {
 				log.error(e.getMessage(), e);
 			}
-			
+
 			try {
 				// just dump it
 				UrlLogIdentity uli = new UrlLogIdentity();
 				uli.setFirstpacketsec(firstPacketSec);
 				uli.setMacaddr(macAddr.getMacaddr());
-				uli.setUrl(url);
-				
-				if (urlLogRepo.findOne(uli) != null) {
+				uli.setKeyurl(url.substring(0, Math.min(url.length(), 255)));// sengaja dipotong
+
+				if (urlLogRepo.findOne(uli) == null) {
 					UrlLog entity = new UrlLog();
 					entity.setUrlLogIdentity(uli);
+					entity.setUrl(url);
 					entity.setIpaddr(ipAddress);
 					entity.setLocation(iplocation);
 					entity.setCreateddate(LocalDateTime.now());
 					urlLogRepo.save(entity);
 					log.debug("new row[{}/{}] = " + StringUtils.objectsToString(fields, ", "), (i + 1), items.size());
-
 				}
-				
-							} catch (Exception e) {
-				// TODO: handle exception
+
+			} catch (Exception e) {
 				log.error(e.getMessage(), e);
 			}
 
 		}
-		
+
 		return CompletableFuture.completedFuture(null);
 	}
 
