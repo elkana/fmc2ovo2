@@ -17,7 +17,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClientException;
 
@@ -29,7 +28,6 @@ import com.ppu.fmc.local.repo.IBlacklistMARepository;
 import com.ppu.fmc.local.repo.IMacAddrRepository;
 import com.ppu.fmc.local.repo.IMacAddrUrlRepository;
 import com.ppu.fmc.ovo.model.RequestClient;
-import com.ppu.fmc.ovo.model.ResponseMsg;
 import com.ppu.fmc.ovo.ws.OVOUrlService;
 import com.ppu.fmc.util.CSVUtils;
 import com.ppu.fmc.util.StopWatch;
@@ -281,6 +279,7 @@ public class Job2 {
 
 		StopWatch sw = StopWatch.AutoStart();
 
+		//http://javapapo.blogspot.com/2016/04/spring-async-and-javas-8.html
 		CompletableFuture<?>[] array = new CompletableFuture<?>[cleanMac.size()];
 
 		for (int i = 0; i < cleanMac.size(); i++) {

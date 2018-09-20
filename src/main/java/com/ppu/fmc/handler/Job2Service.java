@@ -102,7 +102,7 @@ public class Job2Service {
 		return rows;
 	}
 
-	@Async
+	@Async("specificTaskExecutor")
 	public CompletableFuture<Void> collectUrl(List ipLocations, MacAddr macAddr) throws InterruptedException,
 			RestClientException, KeyManagementException, NoSuchAlgorithmException, KeyStoreException, IOException {
 

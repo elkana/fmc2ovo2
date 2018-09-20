@@ -19,7 +19,6 @@ import com.ppu.fmc.util.Utils;
 
 @SpringBootApplication
 @EnableScheduling
-@EnableAsync
 @PropertySources({
 	@PropertySource("classpath:config.properties"),
 })
