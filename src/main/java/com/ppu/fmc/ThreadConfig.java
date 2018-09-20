@@ -12,8 +12,8 @@ public class ThreadConfig {
 	@Bean(name = "specificTaskExecutor")
 	public TaskExecutor threadPoolTaskExecutor() {
 		ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-		executor.setCorePoolSize(100);
-		executor.setMaxPoolSize(1000);
+		executor.setCorePoolSize(100);// bisa menjalankan 100 thread sekaligus
+		executor.setMaxPoolSize(1000);// batas reuse thread
 		executor.setThreadNamePrefix("rclkn");
 		executor.initialize();
 		return executor;

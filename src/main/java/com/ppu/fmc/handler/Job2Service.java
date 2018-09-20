@@ -92,7 +92,7 @@ public class Job2Service {
 
 			rows.addAll(resultList);
 
-			log.debug("findNextConnectionLogs return {} rows", resultList.size());
+			log.debug("searchAllUrlInFMCFor return {} rows", resultList.size());
 
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
@@ -172,6 +172,11 @@ public class Job2Service {
 			}
 
 		}
+		
+//		if (anyDataToSentToOvo) {
+//			action.setLastprocesseddate(LocalDateTime.now().minusMinutes(backProcessedDateMinutes));
+//			macAddrRepo.save(action);
+//		}
 
 		return CompletableFuture.completedFuture(null);
 	}
