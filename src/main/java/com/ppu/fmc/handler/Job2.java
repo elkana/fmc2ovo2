@@ -17,7 +17,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClientException;
 
@@ -29,7 +28,6 @@ import com.ppu.fmc.local.repo.IBlacklistMARepository;
 import com.ppu.fmc.local.repo.IMacAddrRepository;
 import com.ppu.fmc.local.repo.IMacAddrUrlRepository;
 import com.ppu.fmc.ovo.model.RequestClient;
-import com.ppu.fmc.ovo.model.ResponseMsg;
 import com.ppu.fmc.ovo.ws.OVOUrlService;
 import com.ppu.fmc.util.CSVUtils;
 import com.ppu.fmc.util.StopWatch;
@@ -61,7 +59,7 @@ public class Job2 {
 
 	@Value("${ovo.ws.url}")
 	private String urlOVO;
-	
+
 	private List ipLocations;
 
 	@Autowired
@@ -113,11 +111,12 @@ public class Job2 {
 				continue;
 			}
 
-			// hasilnya bisa ribuan kalo ada job sebelumnya sempet mati 
+			// hasilnya bisa ribuan kalo ada job sebelumnya sempet mati
 			// jd hny akan diproses yg firstpacketsec terakhir sesuai jumlah maxUrlSent
-			// bedanya dgn fmcFetchRows adalah dari sisi FMC, kalo maxUrlSent dari sisi MySQL/Local
+			// bedanya dgn fmcFetchRows adalah dari sisi FMC, kalo maxUrlSent dari sisi
+			// MySQL/Local
 			List<Object[]> items = searchAllUrlInFMCFor(action, fmcFetchRows);
-			
+
 			if (maxUrlSent > 0) {
 				while (items.size() > maxUrlSent) {
 					items.remove(0);
@@ -254,7 +253,8 @@ public class Job2 {
 
 	}
 
-	private void methodFast() throws RestClientException, KeyManagementException, NoSuchAlgorithmException, KeyStoreException, InterruptedException, IOException {
+	private void methodFast() throws RestClientException, KeyManagementException, NoSuchAlgorithmException,
+			KeyStoreException, InterruptedException, IOException {
 
 		// 1. cek semua macaddress di table MacAddr
 		List<MacAddr> allMac = macAddrRepo.findAll();
@@ -281,6 +281,7 @@ public class Job2 {
 
 		StopWatch sw = StopWatch.AutoStart();
 
+		// http://javapapo.blogspot.com/2016/04/spring-async-and-javas-8.html
 		CompletableFuture<?>[] array = new CompletableFuture<?>[cleanMac.size()];
 
 		for (int i = 0; i < cleanMac.size(); i++) {
@@ -290,7 +291,7 @@ public class Job2 {
 
 		// Wait until they are all done
 		CompletableFuture.allOf(array).join();
-		
+
 		log.info("Elapsed Fast Method {}", sw.stopAndGetAsString());
 
 	}
@@ -339,7 +340,7 @@ public class Job2 {
 
 			rows.addAll(resultList);
 
-			log.debug("findNextConnectionLogs return {} rows", resultList.size());
+			log.debug("searchAllUrlInFMCFor return {} rows", resultList.size());
 
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
@@ -353,21 +354,24 @@ public class Job2 {
 
 		log.debug("Running {}", Job2.class.getSimpleName());
 
-		// log.debug("fmc.fetch.rows :: {}", fmcFetchRows);
-//		log.debug("local.data.ipclientmap :: {}", ipclientmap);
-//		log.debug("local.data.mac.keep.days :: {}", keepOldMacAddrDays);
+		log.debug("fmc.fetch.rows :: {}", fmcFetchRows);
+		log.debug("local.data.ipclientmap :: {}", ipclientmap);
+		log.debug("local.data.url.sent.max :: {}", maxUrlSent);
 		log.debug("fmc.job2.fast :: {}", fastMode);
+		log.debug("local.procbackdate.minutes :: {}", backProcessedDateMinutes);
+		log.debug("ovo.ws.batch.rows :: {}", ovoBatchRows);
+		log.debug("ovo.ws.url :: {}", urlOVO);
+
 //		log.debug("lastSentFirstPacketSec :: {} -> {}", lastSentFirstPacketSec, Utils.converToLDT(lastSentFirstPacketSec));
 
-		
 		try {
 			ipLocations = CSVUtils.loadIpLocationCsv(ipclientmap);
 		} catch (IOException e1) {
 			e1.printStackTrace();
-			
+
 			return false;
 		}
-		
+
 		try {
 			if (fastMode)
 				methodFast();

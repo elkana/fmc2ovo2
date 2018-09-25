@@ -11,7 +11,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.PropertySources;
-import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 import com.ppu.fmc.util.NetUtils;
@@ -19,7 +18,6 @@ import com.ppu.fmc.util.Utils;
 
 @SpringBootApplication
 @EnableScheduling
-@EnableAsync
 @PropertySources({
 	@PropertySource("classpath:config.properties"),
 })
