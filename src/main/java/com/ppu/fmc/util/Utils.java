@@ -5,11 +5,12 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Utils {
 
-	static Logger log = Logger.getLogger(Utils.class.getName());
+	private static final Logger log = LoggerFactory.getLogger(Utils.class);
 
 	public static boolean isWindows = System.getProperty("os.name").toLowerCase().startsWith("windows");
 
@@ -40,8 +41,9 @@ public class Utils {
 		DecimalFormat df = new DecimalFormat(" (0.0000'%')");
 		DecimalFormat df2 = new DecimalFormat(" # 'KB'");
 
-		log.info("AppInfo=" + appInfo + ", UsedMemory=" + df2.format(used) + df.format(used / max * 100)
-				+ ", UsableMemory=" + df2.format(max - used) + df.format((max - used) / max * 100));
+		log.info("AppInfo={}, UsedMemory={}, UsableMemory={}, cpu={}", appInfo, df2.format(used) + df.format(used / max * 100)
+				,df2.format(max - used) + df.format((max - used) / max * 100)
+				,Runtime.getRuntime().availableProcessors());
 
 	}
 
@@ -53,9 +55,9 @@ public class Utils {
 	public static long convertToSeconds(LocalDateTime ldt) {
 		return ldt.atZone(ZoneId.systemDefault()).toEpochSecond();
 	}
-	
+
 	public static LocalDateTime converToLDT(long seconds) {
 		return Instant.ofEpochSecond(seconds).atZone(ZoneId.systemDefault()).toLocalDateTime();
 	}
-	
+
 }

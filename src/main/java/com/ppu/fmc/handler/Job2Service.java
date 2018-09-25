@@ -37,6 +37,10 @@ public class Job2Service {
 	@Value("${fmc.fetch.rows:5}")
 	private int fmcFetchRows;
 
+	// 0 for unlimited
+	@Value("${local.data.url.sent.max:0}")
+	private int maxUrlSent;
+
 	@Autowired
 	@Qualifier("fmcEntityManagerFactory")
 	EntityManager em;
@@ -108,8 +112,14 @@ public class Job2Service {
 
 		List<Object[]> items = searchAllUrlInFMCFor(macAddr, fmcFetchRows);
 
+		if (maxUrlSent > 0) {
+			while (items.size() > maxUrlSent) {
+				items.remove(0);
+			}
+		}
+
 		log.info("COLLECTING {} urls in connection_log for ip {}, mac {} since {}", items.size(), macAddr.getIpaddr(),
-				macAddr.getMacaddr(), macAddr.getLastprocesseddate());
+				macAddr.getMacaddr(), macAddr.getLastprocesseddate() == null ? macAddr.getCreateddate() : macAddr.getLastprocesseddate() );
 
 		List<String> ipAddressesInHexa = new ArrayList<String>();
 
